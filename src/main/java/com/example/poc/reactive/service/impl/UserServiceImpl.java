@@ -1,6 +1,7 @@
 package com.example.poc.reactive.service.impl;
 
 import com.example.poc.reactive.entity.Users;
+import com.example.poc.reactive.exception.EntityNotFoundException;
 import com.example.poc.reactive.repo.UsersRepo;
 import com.example.poc.reactive.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +26,19 @@ public class UserServiceImpl implements UsersService {
     }
 
     @Override
-    public Mono<Users> findUserById() {
-        return null;
+    public Mono<Users> findUserById(Long id) {
+        return usersRepo.findById(id)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("not.found")));
     }
 
     @Override
-    public Mono<Users> saveUser(Users users) {
-        return usersRepo.save(users);
+    public Mono<Users> saveUser(Mono<Users> users) {
+        return users.flatMap(usersRepo::save);
+    }
+
+    @Override
+    public Mono<Users> updateUser(Mono<Users> users, Long id) {
+        return null;
     }
 
     @Override

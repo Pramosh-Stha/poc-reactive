@@ -13,9 +13,11 @@ public interface UsersService {
 
     Flux<Users> findAllUser();
 
-    Mono<Users> findUserById();
+    Mono<Users> findUserById(Long id);
 
-    Mono<Users> saveUser(Users users);
+    Mono<Users> saveUser(Mono<Users> users);
+
+    Mono<Users> updateUser(Mono<Users> users, Long id);
 
     Mono<Integer> deleteUser(Long id);
 }

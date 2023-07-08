@@ -8,10 +8,11 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 
 /**
+ * The interface User data mapper.
+ *
  * @author Pramosh Shrestha
- * @created 06/07/2023: 08:01
+ * @created 06 /07/2023: 08:01
  */
-
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,
@@ -20,7 +21,19 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface UserDataMapper {
 
+    /**
+     * To dto user dto.
+     *
+     * @param users the users
+     * @return the user dto
+     */
     UserDto toDto(Users users);
 
+    /**
+     * To entity users.
+     *
+     * @param userDto the user dto
+     * @return the users
+     */
     Users toEntity(UserDto userDto);
 }

@@ -31,19 +31,20 @@ public class UsersController {
 
     @GetMapping(value = "/{id}")
     public Mono<UserDto> getUserById(@PathVariable(value = "id") final Long id) {
-        return null;
+        return usersService.findUserById(id)
+                .map(userDataMapper::toDto);
     }
 
     @PostMapping
-    public Mono<UserDto> saveAnUser(@RequestBody @Valid UserDto userDto) {
-        return usersService.saveUser(userDataMapper.toEntity(userDto))
+    public Mono<UserDto> saveAnUser(@RequestBody @Valid Mono<UserDto> userDto) {
+        return usersService.saveUser(userDto.map(userDataMapper::toEntity))
                 .map(userDataMapper::toDto);
     }
 
     @PutMapping(value = "/{id}")
     public Mono<UserDto> updateAnUser(
             @PathVariable(value = "id") final Long id,
-            @RequestBody @Valid UserDto userDto
+            @RequestBody @Valid Mono<UserDto> userDto
     ) {
         return null;
     }

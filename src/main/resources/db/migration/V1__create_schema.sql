@@ -1,6 +1,6 @@
 create table if not exists "users"
 (
-    id serial constraint id primary key,
+    id serial constraint users_id primary key,
     created_by  varchar(100),
     created_on  timestamp,
     is_deleted  boolean default false not null,

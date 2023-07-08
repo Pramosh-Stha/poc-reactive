@@ -1,4 +1,4 @@
-package com.example.poc.reactive.config;
+package com.example.poc.reactive.config.db;
 
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
@@ -23,11 +23,10 @@ import java.time.Duration;
  */
 
 @Configuration
-@EnableR2dbcRepositories(basePackages = {"com.example.poc.reactive.repo"})
-@EnableTransactionManagement
 public class R2DBCConfig {
 
     @Bean
+    @Primary
     public ConnectionPool connectionPool() {
         ConnectionFactory connectionFactory = new PostgresqlConnectionFactory(
                 PostgresqlConnectionConfiguration.builder()

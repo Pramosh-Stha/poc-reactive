@@ -1,4 +1,4 @@
-package com.example.poc.reactive.config;
+package com.example.poc.reactive.config.db;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
