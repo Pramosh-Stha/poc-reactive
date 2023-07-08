@@ -1,0 +1,64 @@
+spring:
+  profiles:
+    active: development
+  application:
+    name: reactive
+  servlet:
+    multipart:
+      max-file-size: 30MB
+  main:
+    web-application-type: reactive
+
+  sql:
+    init:
+      platform: postgres
+
+mybatis:
+  # Tells mybatis to look in resources/mybatis-xml-mapper for XML
+  mapper-locations: classpath*:/mybatis-xml-mapper/*.xml, classpath*:/mybatis-xml-mapper/**/*.xml
+  # Tells mybatis to look for our POJO class in the right package configuration:
+  type-aliases-package: com.example.poc.reactive.dto.**, com.example.poc.reactive.entity.**
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+
+logging:
+  level:
+    root: INFO
+
+---
+
+server:
+  port: ${USER_SERVICE_PORT:8080}
+
+spring:
+  config:
+    activate:
+      on-profile: development
+#  r2dbc:
+#    username: ycore
+#    password: Yantra#1209
+#    url: r2dbc:pool:postgresql://dev-restroverse.c234umvyutgq.us-east-1.rds.amazonaws.com:5432/postgres?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useLocalSessionState=true
+#    properties:
+#      schema: rdb
+
+#  datasource:
+#    hikari:
+#      schema: rdb
+#  jpa:
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        default_schema: rdb
+
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: DEBUG
+    com:
+      example:
+        poc:
+          reactive:
+            mapper:
+              mybatis: DEBUG
