@@ -1,65 +1,42 @@
 package com.example.poc.reactive.exception.handler;
 
-import com.example.poc.reactive.utils.ResponseBodyWrapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
+import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebExceptionHandler;
-import reactor.core.publisher.Flux;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Map;
 
-/**
- * @author Pramosh Shrestha
- * @created 08/07/2023: 13:04
- */
 @Component
-@RequiredArgsConstructor
-@Order(value = -2)
-public class GlobalErrorWebExceptionHandler implements WebExceptionHandler {
+@Order(-2)
+public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHandler {
 
-    private final ObjectMapper objectMapper;
+    public GlobalErrorWebExceptionHandler(GlobalErrorAttributes globalErrorAttributes, ApplicationContext applicationContext, ServerCodecConfigurer serverCodecConfigurer) {
+        super(globalErrorAttributes, new WebProperties.Resources(), applicationContext);
+        super.setMessageWriters(serverCodecConfigurer.getWriters());
+        super.setMessageReaders(serverCodecConfigurer.getReaders());
+    }
 
     @Override
-    public @NotNull Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        try {
-            ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatusCode.valueOf(400));
-            response.getHeaders()
-                    .setContentType(MediaType.APPLICATION_JSON);
-
-            return response.writeWith(
-                    Flux.just(
-                            response.bufferFactory()
-                                    .wrap(
-                                            objectMapper.writeValueAsString(
-                                                            ResponseBodyWrapper.<Void>builder()
-                                                                    .message(ex.getMessage())
-                                                                    .errorStack(
-                                                                            Arrays.stream(ex.getStackTrace())
-                                                                                    .map(StackTraceElement::toString)
-                                                                                    .limit(20)
-                                                                                    .toList()
-                                                                    )
-                                                                    .errorMessage(ex.getLocalizedMessage())
-                                                                    .build()
-                                                    )
-                                                    .getBytes(StandardCharsets.UTF_8)
-                                    )
-                    )
-            );
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+    protected RouterFunction<ServerResponse> getRoutingFunction(final ErrorAttributes errorAttributes) {
+        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
     }
+
+    private Mono<ServerResponse> renderErrorResponse(final ServerRequest request) {
+        final Map<String, Object> errorPropertiesMap = getErrorAttributes(request, ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE, ErrorAttributeOptions.Include.BINDING_ERRORS, ErrorAttributeOptions.Include.MESSAGE, ErrorAttributeOptions.Include.EXCEPTION));
+
+        return ServerResponse.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(errorPropertiesMap));
+    }
+
 }
