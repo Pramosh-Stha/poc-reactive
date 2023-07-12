@@ -56,6 +56,7 @@ logging:
     org:
       springframework:
         r2dbc: DEBUG
+        cache: TRACE
     com:
       example:
         poc:
